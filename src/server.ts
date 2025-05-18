@@ -16,12 +16,11 @@ const server = new McpServer({
 // Register weather tools
 server.tool(
   "aoe2-query",
-  "Query the AoE2 assistant",
   {
     question: z.string().describe("The question to ask the AoE2 assistant"),
   },
   async ({ question }) => {
-    logger.info(`Received question: ${question}`);
+    console.log(`Received question: ${question}`);
     return {
       content: [
         {
@@ -36,10 +35,10 @@ server.tool(
 async function main() {
   const transport = new StdioServerTransport();
   await server.connect(transport);
-  logger.error("AoE2 Assistant MCP Server running on stdio");
+  logger.info("AoE2 Assistant MCP Server running on stdio");
 }
 
 main().catch((error) => {
-  console.error("Fatal error in main():", error);
+  logger.error("Fatal error in main():", error);
   process.exit(1);
 });
