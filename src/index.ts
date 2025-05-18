@@ -1,61 +1,34 @@
 import express, { Request, Response } from "express";
 import { createServer } from "http";
-import { Server, Socket } from "socket.io";
 import { config } from "./config";
 import logger from "./utils/logger";
-
-interface GameJoinData {
-  playerId: string;
-  gameId?: string;
-  playerName: string;
-}
-
-interface GameLeaveData {
-  playerId: string;
-  gameId: string;
-}
-
-interface HeartbeatData {
-  playerId: string;
-  gameId: string;
-  timestamp: number;
-}
+import { contextManager } from "./services/contextManager";
+import { MCPRequest, MCPResponse } from "./types/mcp";
 
 const app = express();
-const httpServer = createServer(app);
-const io = new Server(httpServer, {
-  cors: {
-    origin: "*", // In production, replace with specific origins
-    methods: ["GET", "POST"],
-  },
-});
+app.use(express.json());
 
-// Basic health check endpoint
+const httpServer = createServer(app);
+
+// Health check endpoint
 app.get("/health", (req: Request, res: Response) => {
   res.json({ status: "ok", timestamp: new Date().toISOString() });
 });
 
-// Socket.IO connection handling
-io.on("connection", (socket: Socket) => {
-  logger.info(`Client connected: ${socket.id}`);
+// MCP HTTP endpoints
+app.post("/mcp", async (req: Request, res: Response) => {
+  const request = req.body as MCPRequest;
+  const response = await contextManager.handleRequest(request);
+  res.json(response);
+});
 
-  socket.on("disconnect", () => {
-    logger.info(`Client disconnected: ${socket.id}`);
-  });
-
-  // Handle MCP specific events
-  socket.on("game:join", (data: GameJoinData) => {
-    logger.info(`Player joining game: ${JSON.stringify(data)}`);
-    // TODO: Implement game joining logic
-  });
-
-  socket.on("game:leave", (data: GameLeaveData) => {
-    logger.info(`Player leaving game: ${JSON.stringify(data)}`);
-    // TODO: Implement game leaving logic
-  });
-
-  socket.on("game:heartbeat", (data: HeartbeatData) => {
-    // TODO: Implement heartbeat logic
+// Graceful shutdown
+process.on("SIGTERM", () => {
+  logger.info("SIGTERM received. Shutting down gracefully...");
+  contextManager.destroy();
+  httpServer.close(() => {
+    logger.info("Server closed");
+    process.exit(0);
   });
 });
 
