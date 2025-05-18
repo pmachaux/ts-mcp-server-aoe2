@@ -20,7 +20,7 @@ server.tool(
     question: z.string().describe("The question to ask the AoE2 assistant"),
   },
   async ({ question }) => {
-    console.log(`Received question: ${question}`);
+    logger.info(`Received question: ${question}`);
     return {
       content: [
         {
