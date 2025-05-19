@@ -1,12 +1,15 @@
 {
   "name": "ts-mcp-server-aoe2",
   "version": "1.0.0",
+  "type": "module",
   "description": "Model Context Protocol server for Age of Empires 2 chat assistant",
   "main": "dist/server.js",
   "scripts": {
-    "start": "node dist/server.js",
+    "start": "pnpm run build && node dist/client/index.js",
     "dev": "ts-node-dev --respawn --transpile-only src/server.ts",
-    "build": "tsc",
+    "copy-env": "copy .env dist\\.env",
+    "clean": "rimraf dist",
+    "build": "npm run clean && tsc && npm run copy-env",
     "test": "jest",
     "lint": "eslint . --ext .ts"
   },
@@ -21,10 +24,10 @@
   "license": "ISC",
   "packageManager": "pnpm@10.11.0",
   "dependencies": {
+    "@anthropic-ai/sdk": "^0.51.0",
     "@modelcontextprotocol/sdk": "^1.11.4",
     "dotenv": "^16.4.5",
     "express": "^4.18.2",
-    "openai": "^4.28.0",
     "uuid": "^9.0.1",
     "winston": "^3.11.0",
     "zod": "^3.24.4"
@@ -38,6 +41,7 @@
     "@typescript-eslint/parser": "^7.1.0",
     "eslint": "^8.57.0",
     "jest": "^29.7.0",
+    "rimraf": "^5.0.5",
     "ts-jest": "^29.1.2",
     "ts-node-dev": "^2.0.0",
     "typescript": "^5.3.3"
