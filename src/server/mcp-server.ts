@@ -1,6 +1,7 @@
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
-import { z } from "zod";
 import type { Logger } from "winston";
+import { getToolUnitStatsLookup } from "./tools/unit-stats-lookup.js";
+import { getToolBuildOrderSuggestion } from "./tools/build-order-suggestion.js";
 
 // Create server instance
 export const getMcpServer = (logger: Logger) => {
@@ -12,24 +13,8 @@ export const getMcpServer = (logger: Logger) => {
       tools: {},
     },
   });
-  // Register weather tools
-  server.tool(
-    "aoe2-query",
-    "Prepare questions with context about aoe2",
-    {
-      question: z.string().describe("The question to ask the AoE2 assistant"),
-    },
-    async ({ question }) => {
-      logger.info(`Received question: ${question}`);
-      return {
-        content: [
-          {
-            type: "text",
-            text: "Hello, how can I help you with Age of Empires 2?",
-          },
-        ],
-      };
-    }
-  );
+
+  getToolUnitStatsLookup(server, logger);
+  getToolBuildOrderSuggestion(server, logger);
   return server;
 };
