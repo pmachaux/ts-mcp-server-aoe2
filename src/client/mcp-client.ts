@@ -71,6 +71,7 @@ export class MCPClient {
       tools: this.tools,
       system: `You are looking up information about Age of Empires 2.
     When a user asks a question, you rely only on the tools provided to you.
+    In your response, do not mention that you are using tools, keep it concise.
     You do not make up information or make assumptions.
     
     Available tools:
