@@ -10,8 +10,13 @@ app.use(express.json());
 
 app.post("/api/chat", async (req, res) => {
   const { query } = req.body;
-  const response = await mcpClient.processQuery(query);
-  res.json({ response });
+  try {
+    const response = await mcpClient.processQuery(query);
+    res.json({ response });
+  } catch (e) {
+    logger.error("Error processing query: ", e);
+    res.status(500).json({ error: "Internal server error" });
+  }
 });
 
 const PORT = process.env.PORT || 3000;

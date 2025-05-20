@@ -1,6 +1,8 @@
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import type { Logger } from "winston";
 import { z } from "zod";
+import { aoe2Units } from "../../models/unit-stats.js";
+import { CallToolResult } from "@modelcontextprotocol/sdk/types.js";
 
 export const getToolUnitStatsLookup = (server: McpServer, logger: Logger) => {
   server.tool(
@@ -10,11 +12,24 @@ export const getToolUnitStatsLookup = (server: McpServer, logger: Logger) => {
       unitName: z.string().min(1).describe("Name of the unit to look up"),
       includeCivilizationBonuses: z
         .boolean()
+        .optional()
         .describe("Whether to include civilization-specific bonuses"),
     },
-    async ({ unitName, includeCivilizationBonuses }) => {
-      // TODO: Implement this
-      return {} as any;
+    ({ unitName, includeCivilizationBonuses }): CallToolResult => {
+      logger.info(`Looking up unit stats for ${unitName}`);
+      const match = aoe2Units.find((unit) => unit.unitName === unitName);
+      const text = `The unit ${unitName} has the following stats: ${JSON.stringify(
+        match
+      )}`;
+      logger.info(`Got info for ${unitName}`, text);
+      return {
+        content: [
+          {
+            type: "text",
+            text,
+          },
+        ],
+      } satisfies CallToolResult;
     }
   );
 };
